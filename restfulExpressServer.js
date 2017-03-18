@@ -21,8 +21,10 @@ app.get('/pets', (req, res) => {
   fs.readFile(petPath, 'utf8', (err, petData) => {
     if (err) {
       console.error(err.stack);
+
       return res.sendStatus(500);
     }
+    res.setHeader('Content-Type', 'application/json');
     res.send(petData);
   });
 });
@@ -31,7 +33,8 @@ app.get('/pets/:id', (req, res) => {
   fs.readFile(petPath, 'utf8', (err, petJSON) => {
     if (err) {
       console.error(err.stack);
-       return res.sendStatus(500);
+
+      return res.sendStatus(500);
     }
     let id = Number.parseInt(req.params.id);
     let pets = JSON.parse(petJSON);
@@ -45,26 +48,34 @@ app.get('/pets/:id', (req, res) => {
 });
 
 app.post('/pets', (req, res) => {
-  if (req.body.name === '' || req.body.age === '' || req.body.kind === '' || isNaN(req.body.age)) {
-    return res.sendStatus(400);
-  }
-
-  fs.readFile(petPath, 'utf8', (err, petJSON) => {
+  fs.readFile(petPath, 'utf8', (err, petData) => {
     if (err) {
       console.error(err.stack);
       res.sendStatus(500);
     }
+    if (req.body.name === '' || req.body.age === '' || req.body.kind === '' || isNaN(req.body.age)) {
+      return res.sendStatus(400);
+    }
+    let pets = JSON.parse(petData);
+    let name = req.body.name;
+    let age = Number.parseInt(req.body.age);
+    let kind = req.body.kind;
 
-    let jData = JSON.parse(petJSON);
-    jData.push(req.body);
+    let pet = {
+      age,
+      kind,
+      name
+    }
 
-    let petJson2 = JSON.stringify(jData);
+    pets.push(pet);
+    let petDataJson = JSON.stringify(pets);
 
-    fs.writeFile(petPath, petJson2, (writeErr) => {
-      console.error(writeErr);
+    fs.writeFile(petPath, petDataJson, (writeErr) => {
+      if (writeErr) {
+        throw writeErr;
+      }
+      res.send(pet);
     });
-
-    res.set('Content-Type', 'application/json').send(req.body);
   });
 });
 
@@ -72,3 +83,5 @@ app.post('/pets', (req, res) => {
 app.listen(app.get('port'), () => {
   console.log('Listening on port: ', app.get('port'));
 });
+
+module.exports = app;
