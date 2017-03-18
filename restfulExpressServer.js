@@ -46,8 +46,8 @@ app.get('/pets/:id', (req, res) => {
 
 app.post('/pets', (req, res) => {
   if (req.body.name === '' || req.body.age === '' || req.body.kind === '' || isNaN(req.body.age)) {
-    res.sendStatus(400);
-  } else {
+    return res.sendStatus(400);
+  }
 
   fs.readFile(petPath, 'utf8', (err, petJSON) => {
     if (err) {
@@ -66,7 +66,6 @@ app.post('/pets', (req, res) => {
 
     res.set('Content-Type', 'application/json').send(req.body);
   });
-  }
 });
 
 
