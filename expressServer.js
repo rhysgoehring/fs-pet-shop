@@ -36,7 +36,6 @@ app.get('/pets/:id', (req,res) => {
       return res.sendStatus(404);
     }
 
-
     res.send(pets[id]);
   });
 });
