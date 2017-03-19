@@ -78,7 +78,74 @@ app.post('/pets', (req, res) => {
     });
   });
 });
+app.patch('/pets/:id', (req, res) => {
+  fs.readFile(petPath, 'utf8', (err, petData) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
 
+
+    let pets = JSON.parse(petData);
+    let id = Number.parseInt(req.params.id);
+
+    if (id < 0 || id >= pets.length || Number(isNaN(id))) {
+      return res.sendStatus(400);
+    }
+
+    let age = Number.parseInt(req.body.age);
+    let kind = req.body.kind;
+    let name = req.body.name;
+
+    if (age) {
+      pets[id]["age"] = age;
+    }
+    if (name) {
+      pets[id]["name"] = name;
+    }
+    if (kind) {
+      pets[id]["kind"] = kind;
+    }
+
+    let petDataJson = JSON.stringify(pets);
+
+    fs.writeFile(petPath, petDataJson, (writeErr) => {
+      if (writeErr) {
+        throw writeErr;
+      }
+      res.send(pets[id]);
+    });
+  });
+});
+
+app.delete('/pets/:id', (req, res) => {
+  fs.readFile(petPath, 'utf8', (err, petData) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+
+    let pets = JSON.parse(petData);
+    let id = Number.parseInt(req.params.id);
+    if (id < 0 || id >= pets.length || Number(isNaN(id))) {
+      return res.sendStatus(400);
+    }
+
+    let deletedPet = pets.splice(id, 1);
+    let petJson = JSON.stringify(deletedPet);
+
+    fs.writeFile(petPath, petJson, (writeErr) => {
+      if (writeErr) {
+        throw writeErr;
+      }
+      res.send(deletedPet[0]);
+    });
+  });
+});
+
+app.use((req, res) => {
+  res.sendStatus(404);
+});
 
 app.listen(app.get('port'), () => {
   console.log('Listening on port: ', app.get('port'));
